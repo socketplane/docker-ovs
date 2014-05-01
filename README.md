@@ -2,7 +2,7 @@ docker-ovs
 ==========
 
 docker-ovs creates userspace [Open vSwitch](http://openvswitch.org) containers.
-Running Open vSwitch in userspace mode is experimental and performance is guaranteed.
+Running Open vSwitch in userspace mode is experimental and performance is not guaranteed.
 This is provided for testing purposes, specifically for testing against multiple versions of openvswitch with CI tools.
 
 ## Installation
