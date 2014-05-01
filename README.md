@@ -21,6 +21,8 @@ To change the version of OpenvSwitch used (default is 2.1.0)
 
     docker run docker-ovs -e "OVS_VERSION=1.6.1"
 
+> Note: You need the "tun" kernel module loaded to run this container
+
 ## Test Environment
 
 To bring up the test environment
@@ -29,28 +31,33 @@ To bring up the test environment
 
 To build the container
 
-    docker build -t dave-tucker/ovs-docker /vagrant
+    docker build -t davetucker/ovs-docker /vagrant
 
 ## Packer
+
+First [install Packer](http://www.packer.io/docs/installation.html), to do this in OSX:
 
     brew tap homebrew/binary
     brew install packer
 
+To build the docker container with the latest Open vSwitch:
 
     packer build packer/docker-ovs.json
+
+To build a container with an older Open vSwitch version:
 
     packer build -var 'ovs_version=1.6.1' packer/docker-ovs.json
 
 ## Contributing
 
-1) Raise an issue
-2) Fork the repository
-3) Fix the issue
-4) Submit a pull request
+1. Raise an issue
+2. Fork the repository
+3. Fix the issue
+4. Submit a pull request
 
 ## License & Authors
 
-- Author: Dave Tucker ([djt@redhat.com)
+Author: Dave Tucker (djt@redhat.com)
 
     Copyright 2014 Red Hat Inc.
 
