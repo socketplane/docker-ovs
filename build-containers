@@ -1,8 +1,4 @@
-# Dockerfile to build userspace Open vSwitch container images
-# Based on Fedora
-#
-# Version 0.1
-#
+#!/usr/bin/env python
 # Copyright 2014 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,17 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM fedora
+import subprocess
 
-MAINTAINER Dave Tucker <djt@redhat.com>
+OVS_VERSIONS = [
+ "1.4.6",
+ "1.5.0",
+ "1.6.1",
+ "1.7.0",
+ "1.7.1",
+ "1.7.3",
+ "1.9.0",
+ "1.9.3",
+ "1.10.0",
+ "1.10.2",
+ "1.11.0",
+ "2.0.0",
+ "2.0.1",
+ "2.1.0",
+ "2.1.1",
+]
 
-RUN yum -q -y update
-RUN yum -q -y install gcc make libtool openssl openssl-devel autoconf automake python-devel kernel-devel wget
-
-ENV OVS_VERSION 2.1.0
-
-ADD scripts/install-ovs.sh /tmp/install-ovs.sh
-
-EXPOSE 6640 6633 6644
-
-CMD /tmp/install-run-ovs.sh
+for version in OVS_VERSIONS:
+    subprocess.call(
+        "packer build -var 'ovs_version=%s' packer/docker-ovs.json" % version,
+        shell=True
+    )

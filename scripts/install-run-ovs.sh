@@ -15,11 +15,7 @@
 
 set -e
 
-echo " -----> Installing dependencies"
-yum -q -y update
-yum -q -y install gcc autoconf automake gcc gdb kernel-devel kernel-headers openssl openssl-devel libtool make perl pkgconfig python python-simplejson supervisor wget
-
-echo " -----> Downloading OVS $OVS_VERSION"
+echo " -----> Downloading OVS"
 
 OVS="openvswitch-$OVS_VERSION"
 URL="http://openvswitch.org/releases/$OVS.tar.gz"
@@ -35,15 +31,14 @@ cd $OVS
 make > /dev/null 2>&1
 make install > /dev/null 2>&1
 
-
 echo " -----> Enabling OVS userspace support"
 
 if [ ! -d /dev/net ]; then
-    su -c "mkdir -p /dev/net"
+    mkdir -p /dev/net
 fi
 
 if [ ! -c /dev/net/tun ]; then
-    su -c "mknod /dev/net/tun c 10 200"
+    mknod /dev/net/tun c 10 200
 fi
 
 echo " -----> Configuring OVS"
@@ -51,6 +46,10 @@ echo " -----> Configuring OVS"
 mkdir -p /usr/local/etc/openvswitch
 
 if [ ! -f /usr/local/etc/openvswitch/conf.db ]; then
-    ovsdb-tool create /usr/local/etc/openvswitch/conf.db vswitchd/vswitch.ovsschema
+    ovsdb-tool create
 fi
 
+ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock --detach
+
+echo " -----> Starting OVS"
+ovs-vswitchd -v

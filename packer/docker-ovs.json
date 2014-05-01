@@ -1,23 +1,32 @@
 {
   "description": "Userspace Open vSwitch containers",
+  "variables": {
+    "ovs_version": "2.1.0"
+  },
   "builders": [
     {
       "type": "docker",
       "image": "fedora",
-      "export_path": "docker-ovs.tar",
+      "export_path": "docker-ovs-{{user `ovs_version`}}.tar",
       "run_command": [
         "run",
-        "-d",
         "--privileged=true",
-        "-P=true",
-        "{{.Image}}"
+        "-d",
+        "-i",
+        "-t",
+        "-v",
+        "{{.Volumes}}",
+        "{{.Image}}",
+        "/bin/bash"
       ]
     }
   ],
-  "variables": {
-    "ovs_version": "2.1.0"
-  },
   "provisioners": [
+    {
+      "type": "file",
+      "source": "supervisord.conf",
+      "destination": "/etc/supervisord.conf"
+    },
     {
       "type": "shell",
       "script": "scripts/install-ovs.sh",

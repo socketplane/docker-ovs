@@ -7,21 +7,14 @@ This is provided for testing purposes, specifically for testing against multiple
 
 ## Installation
 
-To build the Dockerfile
-
-    docker build github.com/dave-tucker/docker-ovs
+    docker pull davetucker/docker-ovs
 
 ## Running the container
 
-To run the container
-
-    docker run docker-ovs
-
-To change the version of OpenvSwitch used (default is 2.1.0)
-
-    docker run docker-ovs -e "OVS_VERSION=1.6.1"
+    sudo docker run -p 6640:6640 -p 6633:6633 -p 6644:6644 --privileged=true -d -i -t davetucker/docker-ovs:2.1.0 /bin/supervisord -n
 
 > Note: You need the "tun" kernel module loaded to run this container
+> Note: Change the tag for a different OVS version e.g davetucker/docker-ovs:2.0.0
 
 ## Test Environment
 
@@ -29,24 +22,17 @@ To bring up the test environment
 
     vagrant up
 
-To build the container
+Once logged in to the vagrant environment
 
-    docker build -t davetucker/ovs-docker /vagrant
-
-## Packer
-
-First [install Packer](http://www.packer.io/docs/installation.html), to do this in OSX:
-
-    brew tap homebrew/binary
-    brew install packer
-
-To build the docker container with the latest Open vSwitch:
-
-    packer build packer/docker-ovs.json
+    sudo packer build packer/docker-ovs.json
 
 To build a container with an older Open vSwitch version:
 
-    packer build -var 'ovs_version=1.6.1' packer/docker-ovs.json
+    sudo packer build -var 'ovs_version=1.6.1' packer/docker-ovs.json
+
+To build all containers
+
+    ./build_containers
 
 ## Contributing
 
