@@ -1,0 +1,39 @@
+{
+  "description": "Userspace Open vSwitch containers",
+  "builders": [
+    {
+      "type": "docker",
+      "image": "fedora",
+      "export_path": "docker-ovs.tar",
+      "run_command": [
+        "run",
+        "-d",
+        "--privileged=true",
+        "-P=true",
+        "{{.Image}}"
+      ]
+    }
+  ],
+  "variables": {
+    "ovs_version": "2.1.0"
+  },
+  "provisioners": [
+    {
+      "type": "shell",
+      "script": "scripts/install-ovs.sh",
+      "environment_vars": [
+        "OVS_VERSION={{user `ovs_version`}}"
+      ]
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "docker-import",
+        "repository": "davetucker/docker-ovs",
+        "tag": "{{user `ovs_version`}}"
+      },
+      "docker-push"
+    ]
+  ]
+}
