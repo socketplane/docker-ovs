@@ -15,20 +15,33 @@
 
 set -e
 
-echo "---> Installing EPEL"
-#su -c 'rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
+if ! rpm -q epel-release > /dev/null; then
+    echo "---> Installing EPEL"
+    su -c 'rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
+fi
 
-echo "---> Installing Docker"
-su -c 'yum -q -y install docker-io unzip'
+if ! hash docker 2>/dev/null; then
+    echo "---> Installing Docker"
+    su -c 'yum -q -y install docker-io'
+fi
 
-echo "---> Installing Packer"
-cd /tmp
-wget https://dl.bintray.com/mitchellh/packer/0.5.2_linux_amd64.zip -O packer.zip | /dev/null vagrant
-unzip -d packer packer.zip
-su -c "mv packer /usr/local/packer"
-su -c "ln -s /usr/local/packer/* /usr/bin/"
+# /sbin/packer is included in the base box - this is not the packer we are looking for
+if [ -f /usr/sbin/packer ]; then
+    sudo rm /usr/sbin/packer
+fi
+
+if ! hash packer 2>/dev/null; then
+    echo "---> Installing Packer"
+    yum -q -y install unzip
+    cd /tmp
+    wget https://dl.bintray.com/mitchellh/packer/0.5.2_linux_amd64.zip -O packer.zip -q
+    unzip -q -d packer packer.zip
+    su -c "mv packer /usr/local/packer"
+    su -c "ln -s /usr/local/packer/* /usr/bin/"
+fi
 
 echo "---> Starting Docker"
 su -c 'service docker start > /dev/null'
+
 echo "---> Enabling TUN/TAP interfaces"
 su -c "modprobe tun"
