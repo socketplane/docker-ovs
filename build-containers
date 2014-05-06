@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import subprocess
+import sys
 
 OVS_VERSIONS = [
  "1.4.6",
@@ -33,8 +35,23 @@ OVS_VERSIONS = [
  "2.1.1",
 ]
 
-for version in OVS_VERSIONS:
-    subprocess.call(
-        "packer build -var 'ovs_version=%s' packer/docker-ovs.json" % version,
-        shell=True
-    )
+def main():
+
+    euid = os.geteuid()
+    if euid != 0:
+        print("Script not started as root. Running sudo..")
+        args = ['sudo', sys.executable] + sys.argv + [os.environ]
+        os.execlpe('sudo', *args)
+
+    for version in OVS_VERSIONS:
+        print("---> Building Container for Open vSwitch %s" % version)
+
+        subprocess.call("packer build -var 'ovs_version=%s' "
+                        "packer/docker-ovs.json" % version,
+                        shell=True
+        )
+
+    subprocess.call("docker push davetucker/docker-ovs")
+
+if __name__ == "__main__":
+    main()

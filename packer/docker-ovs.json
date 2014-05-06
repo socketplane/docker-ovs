@@ -7,7 +7,7 @@
     {
       "type": "docker",
       "image": "fedora",
-      "export_path": "docker-ovs-{{user `ovs_version`}}.tar",
+      "export_path": "build/docker-ovs-{{user `ovs_version`}}.tar",
       "run_command": [
         "run",
         "--privileged=true",
@@ -41,8 +41,7 @@
         "type": "docker-import",
         "repository": "davetucker/docker-ovs",
         "tag": "{{user `ovs_version`}}"
-      },
-      "docker-push"
+      }
     ]
   ]
 }
