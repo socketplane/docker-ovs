@@ -17,7 +17,7 @@ set -e
 
 echo " -----> Installing dependencies"
 yum -q -y update
-yum -q -y install gcc autoconf automake gcc gdb kernel-devel kernel-headers openssl openssl-devel libtool make perl pkgconfig python python-simplejson supervisor wget
+yum -q -y install gcc autoconf automake openssl openssl-devel libtool make perl pkgconfig python python-simplejson supervisor wget
 
 echo " -----> Downloading OVS $OVS_VERSION"
 
@@ -54,3 +54,7 @@ if [ ! -f /usr/local/etc/openvswitch/conf.db ]; then
     ovsdb-tool create /usr/local/etc/openvswitch/conf.db vswitchd/vswitch.ovsschema
 fi
 
+echo " -----> Cleaning up"
+
+yum -q -y remove gcc autoconf automake openssl-devel libtool
+yum -q -y clean all

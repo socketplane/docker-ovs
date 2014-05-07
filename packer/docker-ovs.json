@@ -1,13 +1,13 @@
 {
   "description": "Userspace Open vSwitch containers",
   "variables": {
-    "ovs_version": "2.1.0"
+    "ovs_version": "2.1.2"
   },
   "builders": [
     {
       "type": "docker",
-      "image": "mattdm/fedora-small",
-      "export_path": "build/docker-ovs-{{user `ovs_version`}}.tar",
+      "image": "mattdm/fedora",
+      "export_path": "docker-ovs-{{user `ovs_version`}}.tar",
       "run_command": [
         "run",
         "--privileged=true",
