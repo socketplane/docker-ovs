@@ -6,7 +6,7 @@
   "builders": [
     {
       "type": "docker",
-      "image": "fedora",
+      "image": "mattdm/fedora-small",
       "export_path": "build/docker-ovs-{{user `ovs_version`}}.tar",
       "run_command": [
         "run",

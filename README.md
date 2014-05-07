@@ -14,6 +14,7 @@ This is provided for testing purposes, specifically for testing against multiple
     sudo docker run -p 6640:6640 -p 6633:6633 -p 6644:6644 --privileged=true -d -i -t davetucker/docker-ovs:2.1.0 /bin/supervisord -n
 
 > Note: You need the "tun" kernel module loaded to run this container
+
 > Note: Change the tag for a different OVS version e.g davetucker/docker-ovs:2.0.0
 
 ## Test Environment

@@ -23,8 +23,11 @@ fi
 if [[ ! $(uname -r) =~ ^3. ]] ; then
     echo "---> Upgrading Kernel"
     su -c "yum -q -y install http://www.elrepo.org/elrepo-release-6-5.el6.elrepo.noarch.rpm"
-    su -c "yum -q -y --enablerepo=elrepo-kernel install kernel-ml"
+    su -c "yum -q -y --enablerepo=elrepo-kernel install kernel-ml kernel-ml-headers kernel-ml-devel"
     su -c "sed -i s/default=1/default=0/g /boot/grub/grub.conf"
+    su -c "yum -q -y install gcc"
+    echo "---> Rebuilding VirtualBox Guest Additions"
+    su -c "/etc/init.d/vboxadd setup > /dev/null"
 fi
 
 if ! hash docker 2>/dev/null; then
@@ -53,6 +56,8 @@ su -c 'chkconfig docker on'
 
 echo "---> Enabling TUN/TAP interfaces"
 su -c "modprobe tun"
+
+
 
 echo "---> Rebooting"
 su -c "reboot"
