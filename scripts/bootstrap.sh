@@ -20,7 +20,7 @@ if ! rpm -q epel-release > /dev/null; then
     su -c 'rpm -Uvh http://download.fedoraproject.org/pub/epel/6/i386/epel-release-6-8.noarch.rpm'
 fi
 
-if ! uname -r | grep 3.; then
+if [[ ! $(uname -r) =~ ^3. ]] ; then
     echo "---> Upgrading Kernel"
     su -c "yum -q -y install http://www.elrepo.org/elrepo-release-6-5.el6.elrepo.noarch.rpm"
     su -c "yum -q -y --enablerepo=elrepo-kernel find kernel-ml"
