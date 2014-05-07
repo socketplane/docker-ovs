@@ -23,8 +23,8 @@ fi
 if [[ ! $(uname -r) =~ ^3. ]] ; then
     echo "---> Upgrading Kernel"
     su -c "yum -q -y install http://www.elrepo.org/elrepo-release-6-5.el6.elrepo.noarch.rpm"
-    su -c "yum -q -y --enablerepo=elrepo-kernel find kernel-ml"
-    su -c "sed -i s/default=0/default=1/g /boot/grub/grub.conf"
+    su -c "yum -q -y --enablerepo=elrepo-kernel install kernel-ml"
+    su -c "sed -i s/default=1/default=0/g /boot/grub/grub.conf"
 fi
 
 if ! hash docker 2>/dev/null; then
