@@ -23,6 +23,8 @@ To run the container with bash shell - you must manually start the process:
 
 > Note: Change the tag for a different OVS version e.g davetucker/docker-ovs:2.0.0
 
+> Note: Docker 0.10.0 upwards does not require the `--privileged=true` flag as 0.10.0 allows non-privileged containers to create device nodes. See the [Docker Changelog}(https://github.com/dotcloud/docker/blob/master/CHANGELOG.md) for more information.
+
 ### Supported Releases
 
 The follwing releases are supported:
