@@ -26,5 +26,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     centos.vm.network "private_network", ip: "192.168.50.4"
     centos.vm.provision "shell", path: "scripts/bootstrap.sh"
+    centos.vm.synced_folder ".", "/vagrant", type: "nfs"
   end
 end
