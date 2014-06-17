@@ -7,17 +7,27 @@ This is provided for testing purposes, specifically for testing against multiple
 
 ## Installation
 
+The containers live on the Docker Index so they can be easily used as follows:
+
     docker pull davetucker/docker-ovs
+
+Or:
+
+    docker pull davetucker/docker-ovs:2.1.2
+
+Or even:
+
+    docker run -t -i davetucker/docker-ovs:2.1.2 /bin/sh
 
 ## Running the container
 
-To run the container with supervisor managing the Open vSwitch processes:
+To run the container listening on port 6640 and with supervisor managing the Open vSwitch processes:
 
-    sudo docker run -p 6640:6640 -p 6633:6633 -p 6644:6644 --privileged=true -d -i -t davetucker/docker-ovs:2.1.2 /bin/supervisord -n
+    sudo docker run -p 6640:6640 --privileged=true -d -i -t davetucker/docker-ovs:2.1.2 /usr/bin/supervisord
 
-To run the container with bash shell - you must manually start the process:
+To run the container listening on port 6640 with a shell - you must manually start the process:
 
-    sudo docker run -p 6640:6640 -p 6633:6633 -p 6644:6644 --privileged=true -d -i -t davetucker/docker-ovs:2.1.2 /bin/bash
+    sudo docker run -p 6640:6640 --privileged=true -i -t davetucker/docker-ovs:2.1.2 /bin/sh
 
 > Note: You need the "tun" kernel module loaded to run this container
 
@@ -62,17 +72,49 @@ To bring up the test environment
 
     vagrant up
 
-Once logged in to the vagrant environment you can build the latest OVS container:
+## Building Containers
 
-    sudo packer build packer/docker-ovs.json
+The build system for the containers now uses [BuildRoot](http://buildroot.uclibc.org/) in addition to [Packer](http://packer.io)
+To build the containers, pull up the Vagrantbox as shown above.
 
-Build a container with an older Open vSwitch version:
+    cd /tmp/buildroot
+    echo 'source "package/openvswitch/Config.in"' >> Config.in
+    make menuconfig
 
-    sudo packer build -var 'ovs_version=1.6.1' packer/docker-ovs.json
+From the menu select:
 
-Or build all containers:
+    openvswitch
+    Target Packages > Utilities > Supervisor
 
-    ./build_containers
+Then exit.
+
+    cd /vagrant
+    ./build-containers.sh
+
+This could take up to 5 hours the first time depending on how powerful your VM is!
+Once this has finished you'll see a lot of `ovsbase-${version}` docker containers.
+These are used by Packer to assemble the final containers.
+
+If you want to do a "clean" build after you've added/removed some packages or libraries.
+
+    ./build-containers -r
+
+If you've made changes and are *sure* that you only need to run `make` for each container.
+
+    ./build-containers -r
+
+## Updating containers
+
+Assuming you only want to make configuration changes.
+
+- Changes to the install/configure scripts
+- Changes to docker-ovs.json
+
+You can run:
+
+    ./reconfigure-containers.sh
+
+This will re-run Packer and build your newly configured containers.
 
 ## Contributing
 

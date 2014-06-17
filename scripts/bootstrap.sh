@@ -48,6 +48,29 @@ if ! hash packer 2>/dev/null; then
     su -c "ln -s /usr/local/packer/* /usr/bin/"
 fi
 
+if [ ! -d /tmp/buildroot ]; then
+    echo "---> Installing Buildroot"
+    yum -q -y install ncurses-devel perl rsync patch unzip bc gcc gcc-c++
+    cd /tmp
+    mkdir buildroot
+    wget http://buildroot.uclibc.org/downloads/buildroot-2014.05.tar.gz -O buildroot.tar.gz -q
+    tar xf buildroot.tar.gz -C buildroot --strip-components=1
+    chown -R vagrant:vagrant buildroot
+    cd buildroot
+    ln -s /vagrant/buildroot/openvswitch package/openvswitch
+    ln -s /vagrant/buildroot/python-supervisor-stdout package/python-supervisor-stdout
+    ln -s /vagrant/buildroot/dockerize.sh .
+    cp -f /vagrant/buildroot/.config .
+fi
+
+if [ ! -d /tmp/supervisor-stdout ]; then
+    echo "---> Installing Supervisor Plugins"
+    cd tmp
+    wget https://pypi.python.org/packages/source/s/supervisor-stdout/supervisor-stdout-0.1.1.tar.gz --no-check-certificate
+    tar xvf supervisor-stdout-0.1.1.tar.gz
+    mv supervisor-stdout-0.1.1 supervisor-stdout
+fi
+
 echo "---> Starting Docker"
 su -c 'service docker start > /dev/null'
 su -c 'chkconfig docker on'

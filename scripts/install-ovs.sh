@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Copyright 2014 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,27 +15,6 @@
 
 set -e
 
-echo " -----> Installing dependencies"
-yum -q -y update
-yum -q -y install gcc autoconf automake openssl openssl-devel libtool make perl pkgconfig python python-simplejson supervisor wget
-
-echo " -----> Downloading OVS $OVS_VERSION"
-
-OVS="openvswitch-$OVS_VERSION"
-URL="http://openvswitch.org/releases/$OVS.tar.gz"
-
-cd /tmp
-wget $URL > /dev/null 2>&1
-tar -xzf "$OVS.tar.gz" > /dev/null 2>&1
-
-echo " -----> Installing OVS"
-
-cd $OVS
-./configure > /dev/null 2>&1
-make > /dev/null 2>&1
-make install > /dev/null 2>&1
-
-
 echo " -----> Enabling OVS userspace support"
 
 if [ ! -d /dev/net ]; then
@@ -46,15 +25,21 @@ if [ ! -c /dev/net/tun ]; then
     su -c "mknod /dev/net/tun c 10 200"
 fi
 
-echo " -----> Configuring OVS"
+echo " -----> Creating OVS Database"
 
-mkdir -p /usr/local/etc/openvswitch
+mkdir -p /etc/openvswitch
+mkdir -p /var/run/openvswitch
 
-if [ ! -f /usr/local/etc/openvswitch/conf.db ]; then
-    ovsdb-tool create /usr/local/etc/openvswitch/conf.db vswitchd/vswitch.ovsschema
+if [ ! -f /etc/openvswitch/conf.db ]; then
+    ovsdb-tool create /etc/openvswitch/conf.db /usr/share/openvswitch/vswitch.ovsschema
 fi
 
-echo " -----> Cleaning up"
+#Make configure script executable
+chmod +x /usr/share/openvswitch/scripts/configure-ovs.sh
 
-yum -q -y remove gcc autoconf automake openssl-devel libtool
-yum -q -y clean all
+echo "-----> Configuring Supervisor"
+
+mkdir -p /var/log/supervisor/
+cd /tmp/supervisor-stdout
+python setup.py install -q
+

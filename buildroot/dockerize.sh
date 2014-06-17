@@ -1,8 +1,4 @@
-# Dockerfile to build userspace Open vSwitch container images
-# Based on Fedora
-#
-# Version 0.1
-#
+#!/bin/sh
 # Copyright 2014 Red Hat, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,17 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM fedora
+IMAGE_DIR="${BUILDROOT_DIR}/output/images"
 
-MAINTAINER Dave Tucker <djt@redhat.com>
+if [ ! -f "${IMAGE_DIR}/rootfs.tar" ]; then
+    exit 1
+fi
 
-RUN yum -q -y update
-RUN yum -q -y install gcc make libtool openssl openssl-devel autoconf automake python-devel kernel-devel wget
+cd ${IMAGE_DIR}
 
-ENV OVS_VERSION 2.1.0
+rm -rf extra
+mkdir extra extra/etc extra/sbin
+touch extra/etc/resolv.conf
+touch extra/sbin/init
 
-ADD scripts/install-ovs.sh /tmp/install-ovs.sh
+cp rootfs.tar "ovsbase-${OPENVSWITCH_VERSION}.tar"
+tar rvf "ovsbase-${OPENVSWITCH_VERSION}.tar" -C extra .
+mv "ovsbase-${OPENVSWITCH_VERSION}.tar" "${HOME}"
 
-EXPOSE 6640 6633 6644
+cid=$(sudo docker images -q ovsbase-${version})
+if [ -n "$cid" ]; then
+    sudo docker rmi "$cid"
+fi
 
-CMD /tmp/install-run-ovs.sh
+sudo docker import - "ovsbase-${OPENVSWITCH_VERSION}" < "${HOME}/ovsbase-${OPENVSWITCH_VERSION}.tar"
