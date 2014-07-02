@@ -21,13 +21,13 @@ Or even:
 
 ## Running the container
 
-To run the container listening on port 6640 and with supervisor managing the Open vSwitch processes:
+To run the container listening on port 6640 (OVSDB) and 9001 (Supervisor XML-RPC API) and with supervisor managing the Open vSwitch processes:
 
-    sudo docker run -p 6640:6640 --privileged=true -d -i -t davetucker/docker-ovs:2.1.2 /usr/bin/supervisord
+    sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -d -i -t davetucker/docker-ovs:2.1.2 /usr/bin/supervisord
 
-To run the container listening on port 6640 with a shell - you must manually start the process:
+To run the container listening on port 6640 (OVSDB) and 9001 (Supervisor XML-RPC API) with a shell - you must manually start the process:
 
-    sudo docker run -p 6640:6640 --privileged=true -i -t davetucker/docker-ovs:2.1.2 /bin/sh
+    sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -i -t davetucker/docker-ovs:2.1.2 /bin/sh
 
 > Note: You need the "tun" kernel module loaded to run this container
 
@@ -65,6 +65,30 @@ To create bridges, please set the datapath type to `netdev` as advised in the Op
     ovs-vsctl add-port br0 eth0
     ovs-vsctl add-port br0 eth1
     ovs-vsctl add-port br0 eth2
+
+### Hardware VTEP Support
+
+Hardware VTEP support is enabled on OVS verisons greater than 2.1.0
+
+To use this, make the necessary configuration changes over OVSDB or via the `ctl` commands in the container:
+
+- Create a bridge called `br-vtep`
+- Add a `eth0` to `br-vtep`
+- Add the bridge and port as a Physical_Switch
+- Set the `tunnel_ips`
+
+Example using `ovs-vsctl` and `vtep-ctl`:
+
+    ovs-vsctl add-br br-vtep
+    ovs-vsctl add-port br-vtep eth0
+    vtep-ctl add-ps br-vtep
+    vtep-ctl add-port br-vtep eth0
+    vtep-ctl set Physical_Switch br-vtep tunnel_ips=192.168.0.3
+
+To start the VTEP Simulator you can use the Supervisor XML-RPC API
+
+    export DOCKER_IP="<ip address>"
+    ./scripts/start-vtep.py
 
 ## Test Environment
 
