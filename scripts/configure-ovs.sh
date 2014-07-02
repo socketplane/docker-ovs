@@ -15,7 +15,7 @@
 
 ovs_version=$(ovs-vsctl -V | grep ovs-vsctl | awk '{print $4}')
 ovs_db_version=$(ovsdb-tool schema-version)
-vtep_db_version = $(ovsdb-tool /usr/share/openvswitch/vtep.ovsschema schema-version)
+vtep_db_version=$(ovsdb-tool /usr/share/openvswitch/vtep.ovsschema schema-version)
 
 ovs_vtep_min_version="2.1.0"
 
@@ -52,5 +52,5 @@ if is_hardware_vtep_capable; then
     supervisorctl stop ovsdb-server
     supervisorctl start ovsdb-server-vtep
     # Hardware VTEP doesn't have a version column in the Global table yet
-    # vtep-ctl --no-wait -- set Global . db-version="$vtep_db_version"
+    # vtep-ctl --no-wait -- set Global . db-version="$vtep_db_version"e
 fi
