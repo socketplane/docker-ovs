@@ -14,8 +14,8 @@
 # limitations under the License.
 
 ovs_version=$(ovs-vsctl -V | grep ovs-vsctl | awk '{print $4}')
-ovs_db_version=$(ovsdb-tool schema-version)
-#vtep_db_version=$(ovsdb-tool /usr/share/openvswitch/vtep.ovsschema schema-version)
+ovs_db_version=$(ovsdb-tool schema-version /usr/share/openvswitch/vswitch.ovsschema)
+#vtep_db_version=$(ovsdb-tool schema-version /usr/share/openvswitch/vtep.ovsschema)
 
 #ovs_vtep_min_version="2.1.0"
 
