@@ -65,7 +65,7 @@ fi
 
 if [ ! -d /tmp/supervisor-stdout ]; then
     echo "---> Installing Supervisor Plugins"
-    cd tmp
+    cd /tmp
     wget https://pypi.python.org/packages/source/s/supervisor-stdout/supervisor-stdout-0.1.1.tar.gz --no-check-certificate
     tar xvf supervisor-stdout-0.1.1.tar.gz
     mv supervisor-stdout-0.1.1 supervisor-stdout
