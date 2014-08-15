@@ -29,7 +29,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     centos.vm.provider "vmware_fusion" do |vf|
       vf.vmx["memsize"] = "2048"
-      vf.vmx["numvcpus"] = "2”
+      vf.vmx["numvcpus"] = "2"
     end
     centos.vm.network "private_network", ip: "192.168.50.4"
     centos.vm.provision "shell", path: "scripts/bootstrap.sh"
