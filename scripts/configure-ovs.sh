@@ -14,24 +14,24 @@
 # limitations under the License.
 
 ovs_version=$(ovs-vsctl -V | grep ovs-vsctl | awk '{print $4}')
-ovs_db_version=$(ovsdb-tool schema-version)
-vtep_db_version=$(ovsdb-tool /usr/share/openvswitch/vtep.ovsschema schema-version)
+ovs_db_version=$(ovsdb-tool schema-version /usr/share/openvswitch/vswitch.ovsschema)
+#vtep_db_version=$(ovsdb-tool schema-version /usr/share/openvswitch/vtep.ovsschema)
 
-ovs_vtep_min_version="2.1.0"
+#ovs_vtep_min_version="2.1.0"
 
-is_hardware_vtep_capable() {
-    if [ "${ovs_vtep_min_version}" ==  "${ovs_version}" ]; then
-        return 0
-    fi
-
-    local lowest_version=$(echo -e "${ovs_vtep_min_version}\n${ovs_version}" | sort -t '.' -g | head -1)
-
-    if [ "${lowest_version}" == "${ovs_vtep_min_version}" ]; then
-        return 0
-    fi
-
-    return 1
-}
+#is_hardware_vtep_capable() {
+#    if [ "${ovs_vtep_min_version}" ==  "${ovs_version}" ]; then
+#        return 0
+#    fi
+#
+#    local lowest_version=$(echo -e "${ovs_vtep_min_version}\n${ovs_version}" | sort -t '.' -g | head -1)
+#
+#    if [ "${lowest_version}" == "${ovs_vtep_min_version}" ]; then
+#        return 0
+#    fi
+#
+#    return 1
+#}
 
 # Add OVS module to PythonPath
 cp -r /usr/share/openvswitch/python/ovs /usr/lib/python2.7/site-packages/ovs
@@ -47,10 +47,10 @@ ovs-vsctl --no-wait -- set Open_vSwitch . system-version="0.1"
 ovs-vsctl --no-wait -- set Open_vSwitch . external-ids:system-id=`cat /proc/sys/kernel/random/uuid`
 ovs-appctl -t ovsdb-server ovsdb-server/add-remote db:Open_vSwitch,Open_vSwitch,manager_options
 
-if is_hardware_vtep_capable; then
-    ovsdb-tool create /etc/openvswitch/vtep.db /usr/share/openvswitch/vtep.ovsschema
-    supervisorctl stop ovsdb-server
-    supervisorctl start ovsdb-server-vtep
-    # Hardware VTEP doesn't have a version column in the Global table yet
-    # vtep-ctl --no-wait -- set Global . db-version="$vtep_db_version"e
-fi
+#if is_hardware_vtep_capable; then
+#    ovsdb-tool create /etc/openvswitch/vtep.db /usr/share/openvswitch/vtep.ovsschema
+#    supervisorctl stop ovsdb-server
+#    supervisorctl start ovsdb-server-vtep
+#    # Hardware VTEP doesn't have a version column in the Global table yet
+#    # vtep-ctl --no-wait -- set Global . db-version="$vtep_db_version"e
+#fi
