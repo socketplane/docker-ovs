@@ -66,7 +66,7 @@ fi
 if [ ! -d /tmp/supervisor-stdout ]; then
     echo "---> Installing Supervisor Plugins"
     cd /tmp
-    wget https://pypi.python.org/packages/source/s/supervisor-stdout/supervisor-stdout-0.1.1.tar.gz --no-check-certificate
+    wget https://pypi.python.org/packages/source/s/supervisor-stdout/supervisor-stdout-0.1.1.tar.gz --no-check-certificate -q
     tar xvf supervisor-stdout-0.1.1.tar.gz
     mv supervisor-stdout-0.1.1 supervisor-stdout
 fi
@@ -78,4 +78,5 @@ su -c 'chkconfig docker on'
 echo "---> Enabling TUN/TAP interfaces"
 su -c "modprobe tun"
 
-echo "---> PLEASE VAGRANT RELOAD NOW!!!"
+echo '---> PLEASE VAGRANT RELOAD NOW!!!'
+

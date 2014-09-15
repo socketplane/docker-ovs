@@ -19,10 +19,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "centos" do |centos|
     centos.vm.box = "centos65x64"
     centos.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/virtualbox/opscode_centos-6.5_chef-provisionerless.box"
+    centos.vm.provider "vmware_fusion" do |v, override|
+      override.vm.box_url = "http://opscode-vm-bento.s3.amazonaws.com/vagrant/vmware/opscode_centos-6.5_chef-provisionerless.box"
+    end
     centos.vm.hostname = "centos"
     centos.vm.provider :virtualbox do |vb|
       vb.memory = 4096
       vb.cpus = 2
+    end
+    centos.vm.provider "vmware_fusion" do |vf|
+      vf.vmx["memsize"] = "2048"
+      vf.vmx["numvcpus"] = "2"
     end
     centos.vm.network "private_network", ip: "192.168.50.4"
     centos.vm.provision "shell", path: "scripts/bootstrap.sh"

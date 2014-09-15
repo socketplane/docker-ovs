@@ -28,12 +28,22 @@ To run the container listening on port 6640 (OVSDB) and 9001 (Supervisor XML-RPC
 To run the container listening on port 6640 (OVSDB) and 9001 (Supervisor XML-RPC API) with a shell - you must manually start the process:
 
     sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -i -t davetucker/docker-ovs:2.1.2 /bin/sh
+    
+Once the container starts, you can start Open vSwitch as follows:
+
+    export OVS_RUNDIR=/var/run/openvswitch
+	sed -i s/nodaemon=true/nodaemon=false/g /etc/supervisord.conf
+	supervisord
+	
+The processes can be controlled using `supervisorctl`
 
 > Note: You need the "tun" kernel module loaded to run this container
 
 > Note: Change the tag for a different OVS version e.g davetucker/docker-ovs:2.0.0
 
 > Note: Docker 0.10.0 upwards does not require the `--privileged=true` flag as 0.10.0 allows non-privileged containers to create device nodes. See the [Docker Changelog](https://github.com/dotcloud/docker/blob/master/CHANGELOG.md) for more information.
+
+> Note: Port 9001 is used to controller supervisorctl over XML-RPC
 
 ### Supported Releases
 
