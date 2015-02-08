@@ -30,7 +30,23 @@ fi
 
 if ! hash docker 2>/dev/null; then
     echo "---> Installing Docker"
-    su -c 'yum -q -y install docker-io'
+    export DOCKER_VERSION=1.3.0
+    if ! which wget > /dev/null; then
+        yum install -y wget
+    fi
+
+    pushd /tmp
+    yum --enablerepo epel-testing install -y docker-io
+    wget https://get.docker.com/builds/Linux/x86_64/docker-$DOCKER_VERSION.tgz
+    tar xzf docker-$DOCKER_VERSION.tgz
+    sudo mv usr/local/bin/docker /usr/bin/
+    wget https://github.com/docker/docker/archive/v$DOCKER_VERSION.tar.gz -O v$DOCKER_VERSION.tar.gz
+    tar xzf v$DOCKER_VERSION.tar.gz
+    mv docker-$DOCKER_VERSION/contrib/init/sysvinit-redhat/docker /etc/init.d/
+    mv docker-$DOCKER_VERSION/contrib/init/sysvinit-redhat/docker.sysconfig /etc/sysconfig/docker
+    chkconfig docker on
+    nohup service docker restart
+    popd
 fi
 
 # /sbin/packer is included in the base box - this is not the packer we are looking for
