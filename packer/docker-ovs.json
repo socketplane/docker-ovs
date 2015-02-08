@@ -47,7 +47,7 @@
     [
       {
         "type": "docker-import",
-        "repository": "davetucker/docker-ovs",
+        "repository": "socketplane/docker-ovs",
         "tag": "{{user `ovs_version`}}"
       }
     ]
