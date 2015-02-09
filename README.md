@@ -9,25 +9,25 @@ This is provided for testing purposes, specifically for testing against multiple
 
 The containers live on the Docker Index so they can be easily used as follows:
 
-    docker pull davetucker/docker-ovs
+    docker pull socketplane/docker-ovs
 
 Or:
 
-    docker pull davetucker/docker-ovs:2.1.2
+    docker pull socketplane/docker-ovs:2.1.2
 
 Or even:
 
-    docker run -t -i davetucker/docker-ovs:2.1.2 /bin/sh
+    docker run -t -i socketplane/docker-ovs:2.1.2 /bin/sh
 
 ## Running the container
 
 To run the container listening on port 6640 (OVSDB) and 9001 (Supervisor XML-RPC API) and with supervisor managing the Open vSwitch processes:
 
-    sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -d -i -t davetucker/docker-ovs:2.1.2 /usr/bin/supervisord
+    sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -d -i -t socketplane/docker-ovs:2.1.2 /usr/bin/supervisord
 
 To run the container listening on port 6640 (OVSDB) and 9001 (Supervisor XML-RPC API) with a shell - you must manually start the process:
 
-    sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -i -t davetucker/docker-ovs:2.1.2 /bin/sh
+    sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -i -t socketplane/docker-ovs:2.1.2 /bin/sh
     
 Once the container starts, you can start Open vSwitch as follows:
 
@@ -39,7 +39,7 @@ The processes can be controlled using `supervisorctl`
 
 > Note: You need the "tun" kernel module loaded to run this container
 
-> Note: Change the tag for a different OVS version e.g davetucker/docker-ovs:2.0.0
+> Note: Change the tag for a different OVS version e.g socketplane/docker-ovs:2.0.0
 
 > Note: Docker 0.10.0 upwards does not require the `--privileged=true` flag as 0.10.0 allows non-privileged containers to create device nodes. See the [Docker Changelog](https://github.com/dotcloud/docker/blob/master/CHANGELOG.md) for more information.
 
