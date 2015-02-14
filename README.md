@@ -1,49 +1,60 @@
 docker-ovs
 ==========
 
-docker-ovs creates userspace [Open vSwitch](http://openvswitch.org) containers.
-Running Open vSwitch in userspace mode is experimental and performance is not guaranteed.
-This is provided for testing purposes, specifically for testing against multiple versions of openvswitch with CI tools.
+docker-ovs creates [Open vSwitch](http://openvswitch.org) containers.
 
 ## Installation
 
-The containers live on the Docker Index so they can be easily used as follows:
+The containers live in DockerHub so they can be easily used as follows:
 
-    docker pull socketplane/docker-ovs
+    docker pull socketplane/openvswitch
 
 Or:
 
-    docker pull socketplane/docker-ovs:2.1.2
+    docker pull socketplane/openvswitch:2.3.1
 
 Or even:
 
-    docker run -t -i socketplane/docker-ovs:2.1.2 /bin/sh
+    docker run -itd davetucker/docker-ovs:2.3.1
 
 ## Running the container
 
-To run the container listening on port 6640 (OVSDB) and 9001 (Supervisor XML-RPC API) and with supervisor managing the Open vSwitch processes:
+To run the container in userspace mode:
 
-    sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -d -i -t socketplane/docker-ovs:2.1.2 /usr/bin/supervisord
+    docker run -itd --cap-add NET_ADMIN socketplane/openvswitch
 
-To run the container listening on port 6640 (OVSDB) and 9001 (Supervisor XML-RPC API) with a shell - you must manually start the process:
+To run the container with the kernel module (assuming you have Linux Kernel 3.7+):
 
-    sudo docker run -p 6640:6640 -p 9001:9001 --privileged=true -i -t socketplane/docker-ovs:2.1.2 /bin/sh
+    modprobe openvswitch
+    docker run -itd --cap-add NET_ADMIN socketplane/openvswitch
     
-Once the container starts, you can start Open vSwitch as follows:
+While it's recommended to load the kernel module outside of the container, it is possible to load the kernel module from within:
 
-    export OVS_RUNDIR=/var/run/openvswitch
-	sed -i s/nodaemon=true/nodaemon=false/g /etc/supervisord.conf
-	supervisord
-	
-The processes can be controlled using `supervisorctl`
+    cid=$(docker run -itd --cap-add NET_ADMIN --cap-add SYS_MODULE -v /lib/modules:/lib/modules  socketplane/openvswitch)
+    docker exec $cid modprobe openvswitch
+    docker exec $cid supervisorctl restart ovs-vswitchd
 
-> Note: You need the "tun" kernel module loaded to run this container
+> Note 1: You need the "tun" kernel module loaded to run in userspace mode
+> Note 2: Change the tag for a specific OVS version e.g socketplane/openvswitch:2.3.0
 
-> Note: Change the tag for a different OVS version e.g socketplane/docker-ovs:2.0.0
+## Controlling The Processes 
 
-> Note: Docker 0.10.0 upwards does not require the `--privileged=true` flag as 0.10.0 allows non-privileged containers to create device nodes. See the [Docker Changelog](https://github.com/dotcloud/docker/blob/master/CHANGELOG.md) for more information.
+The processes can be controlled using  `supervisorctl`
 
-> Note: Port 9001 is used to controller supervisorctl over XML-RPC
+	cid=$(docker run -itd --cap-add NET_ADMIN socketplane/openvswitch)
+	docker exec $cid supervisorctl
+	docker exec $cid supervisorctl stop|start|restart ovs-vswitchd
+	docker exec $cid supervisorctl stop|start|restart ovsdb-server
+
+> Note 3: Port 9001 is used to control supervisorctl over XML-RPC
+
+## Using the Open vSwitch Utilities
+
+	cid=$(docker run -itd --cap-add NET_ADMIN socketplane/openvswitch)
+	docker exec $cid ovs-vsctl show
+	docker exec $cid ovs-vsctl add-br foo
+	docker exec $cid ovs-ofctl -OOpenFlow13 dump-flows foo
+	docker exec $cid ovs-dpctl show
 
 ### Supported Releases
 
@@ -54,19 +65,23 @@ The follwing releases are supported:
 - 1.6.1
 - 1.7.0
 - 1.7.1
+- 1.7.2
 - 1.7.3
 - 1.9.0
 - 1.9.3
 - 1.10.0
 - 1.10.2
 - 1.11.0
-- 2.0.0
+- 2.0
 - 2.0.1
 - 2.1.0
 - 2.1.1
 - 2.1.2
+- 2.1.3
+- 2.3
+- 2.3.1
 
-### Creating bridges
+### Creating bridges in Userspace Mode
 
 To create bridges, please set the datapath type to `netdev` as advised in the Open vSwitch's [INSTALL.userspace](http://git.openvswitch.org/cgi-bin/gitweb.cgi?p=openvswitch;a=blob;f=INSTALL.userspace;h=f54b93e2e54c2efdc88054519038d98390e4183c;hb=HEAD)
 
@@ -80,12 +95,11 @@ To create bridges, please set the datapath type to `netdev` as advised in the Op
 
 Hardware VTEP support is enabled on OVS verisons greater than 2.1.0
 
-To use this, make the necessary configuration changes over OVSDB or via the `ctl` commands in the container:
-
-- Create a bridge called `br-vtep`
-- Add a `eth0` to `br-vtep`
-- Add the bridge and port as a Physical_Switch
-- Set the `tunnel_ips`
+    cid=$(docker run -itd --cap-add NET_ADMIN socketplane/openvswitch)
+    docker exec $cid ovsdb-tool create /etc/openvswitch/vtep.db /usr/share/openvswitch/vtep.ovsschema
+    docker exec $cid supervisorctl stop ovsdb-server
+    docker exec $cid supervisorctl start ovsdb-server-vtep
+    docker exec $cid supervisorctl start ovs-vtep
 
 Example using `ovs-vsctl` and `vtep-ctl`:
 
@@ -95,61 +109,44 @@ Example using `ovs-vsctl` and `vtep-ctl`:
     vtep-ctl add-port br-vtep eth0
     vtep-ctl set Physical_Switch br-vtep tunnel_ips=192.168.0.3
 
-To start the VTEP Simulator you can use the Supervisor XML-RPC API
-
-    export DOCKER_IP="<ip address>"
-    ./scripts/start-vtep.py
-
-## Test Environment
-
-To bring up the test environment
-
-    vagrant up
-
 ## Building Containers
 
-The build system for the containers now uses [BuildRoot](http://buildroot.uclibc.org/) in addition to [Packer](http://packer.io)
-To build the containers, pull up the Vagrantbox as shown above.
+The build system for the containers now uses [BuildRoot](http://buildroot.uclibc.org/)
+To build the containers, first use the tarmaker
 
-    cd /tmp/buildroot
-    echo 'source "package/openvswitch/Config.in"' >> Config.in
-    make menuconfig
+    ./mkrootfs tarmaker-busybox
+    docker build -t socketplane/ovs-base
 
-From the menu select:
+Then to build a container
 
-    openvswitch
-    Target Packages > Utilities > Supervisor
-
-Then exit.
-
-    cd /vagrant
-    ./build-containers.sh
-
-This could take up to 5 hours the first time depending on how powerful your VM is!
-Once this has finished you'll see a lot of `ovsbase-${version}` docker containers.
-These are used by Packer to assemble the final containers.
-
-If you want to do a "clean" build after you've added/removed some packages or libraries.
-
-    ./build-containers -r
-
-If you've made changes and are *sure* that you only need to run `make` for each container.
-
-    ./build-containers -r
+    docker build -t socketplane/openvswitch:2.3.0 2.3.0
 
 ## Updating containers
 
-Assuming you only want to make configuration changes.
+The only files that require edits directly are:
 
-- Changes to the install/configure scripts
-- Changes to docker-ovs.json
+- `Dockerfile`
+- `latest`
+- `reconfigure.sh`
 
-You can run:
+... and possibly ...
 
-    ./reconfigure-containers.sh
+- `configure-ovs.sh`
+- `supervisord.conf`
 
-This will re-run Packer and build your newly configured containers.
+### Adding a new version
 
+Add the new version to `reconfigure.sh` and run the script:
+
+	./reconfigure.sh
+
+If the new version you would like to add is the latest release, update the `Dockerfile` in the root of the repository  and `latest`, before running `reconfigure.sh`.
+
+> Note: Only change the files in the root of the repository
+> `reconfigure.sh` handles copying these to the sub-directories
+> Unfortunately, Docker doesn't allow for a folder to be "shared" between all contexts, and Automated Builds only supports branches/tags/subfolders for now.
+> The better solution moving forward would be to have `Dockerfile.<tag>` in this reposirity, where `Dockerfile` is the latest, but we are dependent on changes in Docker Hub.
+ 
 ## Contributing
 
 1. Raise an issue
