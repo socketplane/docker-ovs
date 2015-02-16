@@ -1,7 +1,7 @@
 docker-ovs
 ==========
 
-docker-ovs creates [Open vSwitch](http://openvswitch.org) containers.
+docker-ovs creates [Open vSwitch](http://openvswitch.org) containers for Docker
 
 ## Installation
 
@@ -15,7 +15,7 @@ Or:
 
 Or even:
 
-    docker run -itd davetucker/docker-ovs:2.3.1
+    docker run -itd socketplane/openvswitch:2.3.1
 
 ## Running the container
 
@@ -111,15 +111,13 @@ Example using `ovs-vsctl` and `vtep-ctl`:
 
 ## Building Containers
 
-The build system for the containers now uses [BuildRoot](http://buildroot.uclibc.org/)
-To build the containers, first use the tarmaker
+To build a container
 
-    ./mkrootfs tarmaker-busybox
-    docker build -t socketplane/ovs-base
+    docker build -t socketplane/openvswitch:2.3 2.3
 
-Then to build a container
+Or to build all containers:
 
-    docker build -t socketplane/openvswitch:2.3.0 2.3.0
+    make build
 
 ## Updating containers
 
@@ -127,7 +125,7 @@ The only files that require edits directly are:
 
 - `Dockerfile`
 - `latest`
-- `reconfigure.sh`
+- `Makefile`
 
 ... and possibly ...
 
@@ -136,17 +134,15 @@ The only files that require edits directly are:
 
 ### Adding a new version
 
-Add the new version to `reconfigure.sh` and run the script:
+Add the new version to `Makefile` and run `make reconfigure`:
 
-	./reconfigure.sh
-
-If the new version you would like to add is the latest release, update the `Dockerfile` in the root of the repository  and `latest`, before running `reconfigure.sh`.
+If the new version you would like to add is the latest release, update the `Dockerfile` in the root of the repository  and `latest`, before running `make reconfigure`.
 
 > Note: Only change the files in the root of the repository
-> `reconfigure.sh` handles copying these to the sub-directories
+> `make reconfigure`  handles copying these to the sub-directories
 > Unfortunately, Docker doesn't allow for a folder to be "shared" between all contexts, and Automated Builds only supports branches/tags/subfolders for now.
 > The better solution moving forward would be to have `Dockerfile.<tag>` in this reposirity, where `Dockerfile` is the latest, but we are dependent on changes in Docker Hub.
- 
+
 ## Contributing
 
 1. Raise an issue
@@ -156,9 +152,10 @@ If the new version you would like to add is the latest release, update the `Dock
 
 ## License & Authors
 
-Author: Dave Tucker (djt@redhat.com)
+Author: Dave Tucker (djt@redhat.com, dave@socketplane.io)
 
     Copyright 2014 Red Hat Inc.
+    Copyright 2015 SocketPlane Inc.
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
