@@ -1,6 +1,6 @@
 FROM socketplane/busybox:latest
-MAINTAINER Dave Tucker <dave@socketplane.io>
-ENV OVS_VERSION 2.3
+MAINTAINER The SocketPlane Team <support@socketplane.io>
+ENV OVS_VERSION 2.4.0
 ENV SUPERVISOR_STDOUT_VERSION 0.1.1
 # Configure supervisord
 RUN mkdir -p /var/log/supervisor/
@@ -23,6 +23,9 @@ RUN wget https://s3-us-west-2.amazonaws.com/docker-ovs/openvswitch-$OVS_VERSION.
 	cp -r openvswitch/* / &&\
 	rm -r openvswitch &&\
 	rm openvswitch-$OVS_VERSION.tar.gz 
+ADD configure-ovs.sh /usr/local/share/openvswitch/
+# Create the database
 RUN ovsdb-tool create /etc/openvswitch/conf.db /usr/local/share/openvswitch/vswitch.ovsschema
-# Start OVS processes using supervisor
-CMD "/usr/bin/supervisord"
+# Put the OVS Python modules on the Python Path
+RUN cp -r /usr/local/share/openvswitch/python/ovs /usr/lib/python2.7/site-packages/ovs
+CMD ["/usr/bin/supervisord"]
