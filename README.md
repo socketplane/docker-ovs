@@ -27,17 +27,26 @@ To run the container with the kernel module (assuming you have Linux Kernel 3.7+
 
     modprobe openvswitch
     docker run -itd --cap-add NET_ADMIN socketplane/openvswitch
-    
+
 While it's recommended to load the kernel module outside of the container, it is possible to load the kernel module from within:
 
     cid=$(docker run -itd --cap-add NET_ADMIN --cap-add SYS_MODULE -v /lib/modules:/lib/modules  socketplane/openvswitch)
     docker exec $cid modprobe openvswitch
     docker exec $cid supervisorctl restart ovs-vswitchd
 
+To use openvswitch version 2.7.0+, you must load the kernel module compiled with
+the source
+
+    cid=$(docker run -itd --cap-add NET_ADMIN --cap-add SYS_MODULE -v /lib/modules:/lib/modules  socketplane/openvswitch)
+    docker exec $cid modprobe nf_nat_ipv6
+    docker exec $cid modprobe gre
+    docker exec $cid sh -c "insmod /usr/local/modules/*.ko"
+    docker exec $cid supervisorctl restart ovs-vswitchd
+
 > Note 1: You need the "tun" kernel module loaded to run in userspace mode
 > Note 2: Change the tag for a specific OVS version e.g socketplane/openvswitch:2.3.0
 
-## Controlling The Processes 
+## Controlling The Processes
 
 The processes can be controlled using  `supervisorctl`
 
@@ -80,6 +89,9 @@ The follwing releases are supported:
 - 2.1.3
 - 2.3
 - 2.3.1
+- 2.3.2
+- 2.4.0
+- 2.7.0
 
 ### Creating bridges in Userspace Mode
 
@@ -108,6 +120,29 @@ Example using `ovs-vsctl` and `vtep-ctl`:
     vtep-ctl add-ps br-vtep
     vtep-ctl add-port br-vtep eth0
     vtep-ctl set Physical_Switch br-vtep tunnel_ips=192.168.0.3
+
+### OVN Support
+
+OVN support is enabled on OVS verisons greater than 2.6.0
+
+    docker exec $cid ovsdb-tool create /etc/openvswitch/ovnnb_db.db /usr/local/share/openvswitch/ovn-nb.ovsschema
+    docker exec $cid ovsdb-tool create /etc/openvswitch/ovnsb_db.db /usr/local/share/openvswitch/ovn-sb.ovsschema
+    docker exec $cid ovsdb-tool create /etc/openvswitch/vtep.db /usr/local/share/openvswitch/vtep.ovsschema
+    docker exec $cid supervisorctl start ovsdb-server-nb
+    docker exec $cid supervisorctl start ovsdb-server-sb
+    docker exec $cid supervisorctl start ovn-northd
+
+    docker exec $cid supervisorctl stop ovsdb-server
+    docker exec $cid supervisorctl start ovsdb-server-vtep
+    modprobe geneve
+    ovs-vsctl set Open_vSwitch . external_ids:ovn-remote="tcp:127.0.0.1:6642" \
+                                 external_ids:ovn-nb="tcp:127.0.0.1:6641" \
+				 external_ids:ovn-encap-ip=127.0.0.1 \
+				 external_ids:ovn-encap-type="geneve"
+
+    docker exec $cid supervisorctl start ovn-controller
+
+    ovn-sbctl show
 
 ## Building Containers
 
