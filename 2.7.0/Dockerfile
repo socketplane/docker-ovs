@@ -18,11 +18,12 @@ RUN wget https://pypi.python.org/packages/source/s/supervisor-stdout/supervisor-
 # Get Open vSwitch
 WORKDIR /
 RUN wget https://s3-us-west-2.amazonaws.com/docker-ovs/openvswitch-$OVS_VERSION.tar.gz --no-check-certificate && \
-	tar -xzvf openvswitch-$OVS_VERSION.tar.gz &&\
-	mv openvswitch-$OVS_VERSION openvswitch &&\
-	cp -r openvswitch/* / &&\
-	rm -r openvswitch &&\
-	rm openvswitch-$OVS_VERSION.tar.gz
+        tar -xzvf openvswitch-$OVS_VERSION.tar.gz && \
+        mv openvswitch-$OVS_VERSION openvswitch && \
+        cp -r openvswitch/* / && \
+        rm -r openvswitch && \
+        rm openvswitch-$OVS_VERSION.tar.gz
+
 ADD configure-ovs.sh /usr/local/share/openvswitch/
 # Create the database
 RUN ovsdb-tool create /etc/openvswitch/conf.db /usr/local/share/openvswitch/vswitch.ovsschema
