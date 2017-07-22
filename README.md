@@ -27,7 +27,7 @@ To run the container with the kernel module (assuming you have Linux Kernel 3.7+
 
     modprobe openvswitch
     docker run -itd --cap-add NET_ADMIN socketplane/openvswitch
-    
+
 While it's recommended to load the kernel module outside of the container, it is possible to load the kernel module from within:
 
     cid=$(docker run -itd --cap-add NET_ADMIN --cap-add SYS_MODULE -v /lib/modules:/lib/modules  socketplane/openvswitch)
@@ -37,7 +37,7 @@ While it's recommended to load the kernel module outside of the container, it is
 > Note 1: You need the "tun" kernel module loaded to run in userspace mode
 > Note 2: Change the tag for a specific OVS version e.g socketplane/openvswitch:2.3.0
 
-## Controlling The Processes 
+## Controlling The Processes
 
 The processes can be controlled using  `supervisorctl`
 
@@ -80,6 +80,9 @@ The follwing releases are supported:
 - 2.1.3
 - 2.3
 - 2.3.1
+- 2.3.2
+- 2.4.0
+- 2.5.2
 
 ### Creating bridges in Userspace Mode
 
