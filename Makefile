@@ -29,7 +29,8 @@ OVS_VERSIONS = \
 	"2.3" \
 	"2.3.1" \
 	"2.3.2" \
-	"2.4.0"
+	"2.4.0" \
+	"2.5.2"
 
 all: reconfigure build
 
